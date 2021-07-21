@@ -1,18 +1,9 @@
 package br.com.caelum.carangobom.vehicle;
 
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import br.com.caelum.carangobom.brand.Brand;
-
 import org.junit.Assert;
-
 import java.math.BigDecimal;
-
-@RunWith(SpringRunner.class)
-@DataJpaTest
 class VehicleFormTest {
 
     @Test
