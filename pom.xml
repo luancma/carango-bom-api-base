@@ -15,7 +15,7 @@
     <description>API do produto de gerenciamento de concessionárias Carango Bom</description>
 
     <properties>
-        <java.version>1.9</java.version>
+        <java.version>1.8</java.version>
         <surefire.skip>false</surefire.skip>
         <sonar.projectKey>luancma_carango-bom-api-base</sonar.projectKey>
         <sonar.organization>luancma</sonar.organization>
