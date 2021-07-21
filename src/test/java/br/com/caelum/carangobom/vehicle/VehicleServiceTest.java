@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -30,28 +31,29 @@ class VehicleServiceTest {
     @Mock
     public BrandService brandService;
 
-    @Mock
-    public BrandRepository brandRepository;
-
     public VehicleService vehicleService;
 
-    Brand brand = new Brand(1l, "Audi");
-    VehicleForm vehicleForm = new VehicleForm(this.brand.getId(), 2012, "TT", new BigDecimal(35000.50));
-    Vehicle vehicle = new Vehicle(brand, 2012, "TT", new BigDecimal(35000.50));
+    public Brand brand;
+    public VehicleForm vehicleForm;
+    public Vehicle vehicle;
 
     @BeforeEach
     void mockConfig() {
         openMocks(this);
-        this.brandService = spy(new BrandService(this.brandRepository));
-        this.vehicleService = spy(new VehicleService(this.vehicleRepository, this.brandService));
 
+        brand = new Brand(1l, "Audi");
+        vehicleForm = new VehicleForm(this.brand.getId(), 2012, "TT", new BigDecimal(35000.50));
+        vehicle = new Vehicle(brand, 2012, "TT", new BigDecimal(35000.50));
+
+        this.vehicleService = new VehicleService(this.vehicleRepository, this.brandService);
     }
 
     @Test
     void shouldCreateVehicle() throws Exception {
 
-        doReturn(brand).when(this.brandService).findById(anyLong());
-        doReturn(vehicle).when(this.vehicleRepository).save(any(Vehicle.class));
+        when(this.brandService.findById(anyLong())).thenReturn(brand);
+
+        when(this.vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
 
         Vehicle result = this.vehicleService.create(this.vehicleForm);
 
@@ -64,8 +66,7 @@ class VehicleServiceTest {
 
     @Test
     void shouldReturn404WhenTryCreateVehicleWithNonexistentBrandId() throws Exception {
-        doThrow(NotFoundException.class).when(this.brandService).findById(anyLong());
-        doReturn(vehicle).when(this.vehicleRepository).save(any(Vehicle.class));
+        when(this.brandService.findById(anyLong())).thenThrow(NotFoundException.class);
 
         Assert.assertThrows(NotFoundException.class, () -> {
             vehicleService.create(vehicleForm);
@@ -74,7 +75,7 @@ class VehicleServiceTest {
 
     @Test
     void shouldReturn404WhenTryUpdateVehicleWithNonexistentBrandId() throws Exception {
-        doThrow(NotFoundException.class).when(this.brandService).findById(anyLong());
+        when(this.brandService.findById(anyLong())).thenReturn(brand);
         when(this.vehicleRepository.findById(anyLong())).thenReturn(Optional.ofNullable(vehicle));
 
         Assert.assertThrows(NotFoundException.class, () -> {
@@ -84,8 +85,8 @@ class VehicleServiceTest {
 
     @Test
     void shouldReturn404WhenTryUpdateVehicleWithNonexistentVehicleId() throws Exception {
-        doThrow(NotFoundException.class).when(this.vehicleRepository).findById(anyLong());
-        doReturn(brand).when(this.brandService).findById(anyLong());
+        when(this.vehicleRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(this.brandService.findById(anyLong())).thenReturn(brand);
 
         Assert.assertThrows(NotFoundException.class, () -> {
             vehicleService.update(vehicle.getId(), vehicleForm);
@@ -96,9 +97,8 @@ class VehicleServiceTest {
     void shouldReturnUpdatedVehicle() throws Exception {
         VehicleForm updatedVehicleForm = new VehicleForm(brand.getId(), 2000, "TT updated", new BigDecimal(50000));
 
-        doReturn(brand).when(this.brandService).findById(anyLong());
+        when(this.brandService.findById(anyLong())).thenReturn(brand);
         when(this.vehicleRepository.findById(anyLong())).thenReturn(java.util.Optional.ofNullable(vehicle));
-        doReturn(vehicle).when(this.vehicleService).findById(anyLong());
 
         Vehicle result = this.vehicleService.update(1L, updatedVehicleForm);
 
@@ -107,6 +107,7 @@ class VehicleServiceTest {
         Assert.assertEquals(vehicle.getYear(), result.getYear());
         Assert.assertEquals(vehicle.getBrand().getId(), result.getBrand().getId());
         Assert.assertEquals(vehicle.getBrand().getName(), result.getBrand().getName());
+
     }
 
     @Test
@@ -120,7 +121,8 @@ class VehicleServiceTest {
 
     @Test
     void shouldDeleteVehicle() throws Exception {
-        doReturn(vehicle).when(this.vehicleService).findById(anyLong());
+        when(this.vehicleRepository.findById(anyLong())).thenReturn(Optional.ofNullable(vehicle));
+
         Vehicle result = this.vehicleService.delete(1L);
 
         Assert.assertEquals(vehicle.getPrice(), result.getPrice());
@@ -128,11 +130,13 @@ class VehicleServiceTest {
         Assert.assertEquals(vehicle.getYear(), result.getYear());
         Assert.assertEquals(vehicle.getBrand().getId(), result.getBrand().getId());
         Assert.assertEquals(vehicle.getBrand().getName(), result.getBrand().getName());
+        Mockito.verify(this.vehicleRepository).delete(vehicle);
+
     }
 
     @Test
     void shouldReturn404WhenTryDeleteWhitNonexistentVehicleId() throws Exception {
-        doThrow(NotFoundException.class).when(this.vehicleService).findById(anyLong());
+        when(this.vehicleRepository.findById(anyLong())).thenReturn(Optional.empty());
         Assert.assertThrows(NotFoundException.class, () -> vehicleService.delete(1L));
     }
 
