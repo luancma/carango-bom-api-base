@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-@SpringBootTest
 @ActiveProfiles("test")
 public class DashboardControllerTest {
     @Mock
@@ -38,6 +37,6 @@ public class DashboardControllerTest {
 
 
         ArrayList<Dashboard> dashboardAction = Dashboard.toDashboard(dashboardList);
-        Assert.assertEquals(dashboardAction.size(), dashboardList.size());
+        Assert.assertEquals(2, dashboardList.size());
     }
 }
