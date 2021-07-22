@@ -16,8 +16,8 @@ public class Dashboard {
      BigInteger totalVehicle;
      BigDecimal totalPrice;
 
-    public static List<Dashboard> toDashboard(List<List<Object>> dashboard){
-        List<Dashboard> listDashboard = new ArrayList<>(1);
+    public static ArrayList<Dashboard> toDashboard(List<List<Object>> dashboard){
+        ArrayList<Dashboard> listDashboard = new ArrayList<>(1);
         dashboard.forEach(el ->
                 listDashboard.add(new Dashboard((String) el.get(0), (BigInteger) el.get(1), (BigDecimal) el.get(2)))
         );

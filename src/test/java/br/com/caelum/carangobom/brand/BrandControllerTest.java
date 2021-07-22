@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ class BrandControllerTest {
 
     @Test
     void shouldReturnListWhenThereAreResults() {
-        List<Brand> brands = List.of(
+        List<Brand> brands = Arrays.asList(
                 new Brand(1L, "Audi"),
                 new Brand(2L, "BMW"),
                 new Brand(3L, "Fiat")

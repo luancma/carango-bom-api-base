@@ -15,8 +15,8 @@ class TestTokenDTO {
 
         TokenDTO tokenDTO = new TokenDTO(tokenValue, typeValue);
 
-        var token = tokenDTO.getToken();
-        var type = tokenDTO.getType();
+        String token = tokenDTO.getToken();
+        String type = tokenDTO.getType();
 
 
         Assert.assertEquals(token, tokenValue);

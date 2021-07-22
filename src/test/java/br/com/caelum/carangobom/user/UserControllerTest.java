@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,7 +61,7 @@ class UserControllerTest {
 
     @Test
     void shouldTestUserDTO_Convert() {
-        List<User> userList = List.of(
+        List<User> userList = Arrays.asList(
                 new User(1L, "username1", "password1"),
                 new User(2L, "username2", "password2")
         );
@@ -70,7 +72,7 @@ class UserControllerTest {
 
     @Test
     void shouldTestListAll() {
-        List<User> userList = List.of(
+        List<User> userList = Arrays.asList(
                 new User(1L, "username1", "password1"),
                 new User(2L, "username2", "password2")
         );
@@ -86,7 +88,7 @@ class UserControllerTest {
     void shouldFindUserWithPathId(){
         User user = new User(1L, "username1", "password1");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        var findById = userController.details(user.getId());
+        ResponseEntity<UserDTO> findById = userController.details(user.getId());
         assertEquals(findById.getStatusCodeValue(), 200);
     }
 

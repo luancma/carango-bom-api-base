@@ -19,7 +19,7 @@ public class UserService {
     }
 
     public User findById(Long id){
-        var validatedUser = userRepository.findById(id);
+        Optional<User> validatedUser = userRepository.findById(id);
         if(validatedUser.isPresent()){
             return validatedUser.get();
         }
@@ -42,7 +42,7 @@ public class UserService {
     }
 
     public boolean removeUserById(Long id){
-        var user = findById(id);
+        User user = findById(id);
         userRepository.deleteById(user.getId());
         return true;
     }
