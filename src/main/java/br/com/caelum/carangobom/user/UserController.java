@@ -47,9 +47,9 @@ public class UserController {
     @CacheEvict(value = "user-list", allEntries = true)
     public ResponseEntity<UserDTO> create(@RequestBody @Valid UserForm userForm, UriComponentsBuilder uriBuilder) {
         User convertedReceivedUser = userForm.toUser();
-        var createdUser = userService.createNewUser(convertedReceivedUser);
+        User createdUser = userService.createNewUser(convertedReceivedUser);
         URI uri = uriBuilder.path("/users/{id}").buildAndExpand(createdUser.getId()).toUri();
-        var convertedUserDTO = UserDTO.toUser(createdUser);
+        UserDTO convertedUserDTO = UserDTO.toUser(createdUser);
         return ResponseEntity.created(uri).body(convertedUserDTO);
     }
 

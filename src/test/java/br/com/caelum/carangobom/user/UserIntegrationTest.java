@@ -3,6 +3,7 @@ package br.com.caelum.carangobom.user;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -20,7 +21,7 @@ import java.net.URI;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserIntegrationTest {
 
     @Autowired
@@ -121,7 +122,7 @@ public class UserIntegrationTest {
         entityManager.persist(converted);
         entityManager.flush();
 
-        var accessToken = new BCryptPasswordEncoder().encode(converted.getPassword());
+        String accessToken = new BCryptPasswordEncoder().encode(converted.getPassword());
         URI uri = new URI("/users/" + converted.getId());
 
         mockMvc.perform(MockMvcRequestBuilders

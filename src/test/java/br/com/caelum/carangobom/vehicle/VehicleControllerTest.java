@@ -1,76 +1,191 @@
 package br.com.caelum.carangobom.vehicle;
 
-import br.com.caelum.carangobom.brand.Brand;
-import br.com.caelum.carangobom.brand.BrandService;
-import br.com.caelum.carangobom.exception.BadRequestException;
-import br.com.caelum.carangobom.exception.NotFoundException;
-import ch.qos.logback.core.net.ObjectWriter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import org.json.JSONArray;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.util.Map;
+
 import org.json.JSONObject;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
+import br.com.caelum.carangobom.brand.Brand;
+import br.com.caelum.carangobom.brand.BrandRepository;
 
-@ActiveProfiles("test")
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class VehicleControllerTest {
 
-    private VehicleController vehicleController;
-    private UriComponentsBuilder uriBuilder;
+	@Autowired
+	private BrandRepository brandRepository;
+	@Autowired
+	private VehicleRepository vehicleRepository;
+	@Autowired
+	private MockMvc mockMvc;
 
-    @Mock
-    private VehicleRepository vehicleRepository;
+	@Test
+	public void shouldReturn404WhenTryUpdateVehicleWithNonexistentBrandId() throws Exception {
+		Brand brand = brandRepository.save(new Brand("Audi"));
+		Vehicle vehicle = vehicleRepository.save(new Vehicle(brand, 2012, "TT", new BigDecimal(3500.95)));
 
-    @Mock
-    private VehicleService vehicleService;
+		URI uri = new URI("/vehicles/" + vehicle.getId());
 
-    @Mock
-    private BrandService brandService;
+		JSONObject body = new JSONObject();
+		body.put("model", "TT");
+		body.put("brandId", 9999);
+		body.put("year", 2012);
+		body.put("price", 35000);
 
-    private VehicleForm vehicleForm;
-    private Vehicle vehicle;
-    private Brand brand;
+		mockMvc.perform(MockMvcRequestBuilders
+				.put(uri)
+				.content(body.toString())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound())
+				.andExpect(response -> Assert.assertEquals("Brand not found", response.getResolvedException().getMessage()))
+		;
+	}
 
-    @BeforeEach
-    public void mockConfig() {
-        openMocks(this);
-        this.vehicleController = new VehicleController(this.vehicleRepository, this.vehicleService);
-        this.uriBuilder = UriComponentsBuilder.fromUriString("http://localhost:8080");
-        this.vehicleForm = new VehicleForm(1L, 2012, "model", new BigDecimal(20000));
-        this.brand = new Brand(1L, "Audi");
-        this.vehicle = this.vehicleForm.toVehicle(this.brand);
-    }
+	@Test
+	public void shouldUpdateVehicleWithCorrectParameters() throws Exception {
+		Brand brand = brandRepository.save(new Brand("Audi"));
+		Vehicle vehicle = vehicleRepository.save(new Vehicle(brand, 2012, "TT", new BigDecimal(3500.95)));
 
-    @Test
-    void shouldCreateVehicle() throws Exception {
-        when(this.vehicleService.create(vehicleForm)).thenReturn(this.vehicle);
+		URI uri = new URI("/vehicles/" + vehicle.getId());
 
-        ResponseEntity<Vehicle> result = vehicleController.create(vehicleForm, uriBuilder);
-        assertEquals(result.getStatusCodeValue(), 201);
-        Mockito.verify(this.vehicleService).create(vehicleForm);
-    }
+		JSONObject expectedBody = new JSONObject();
+		expectedBody.put("brand", brand);
+		expectedBody.put("model", "TT Updated");
+		expectedBody.put("year", 2013);
+		expectedBody.put("price", 40000);
+		expectedBody.put("id", vehicle.getId());
 
+
+		JSONObject body = new JSONObject();
+		body.put("model", "TT Updated");
+		body.put("brandId", brand.getId());
+		body.put("year", 2013);
+		body.put("price", 40000);
+
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.put(uri)
+				.content(body.toString())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
+	@Test
+	public void shouldCreateANewVehicle() throws Exception {
+
+		Brand brand = brandRepository.save(new Brand("Audi"));
+
+		URI uri = new URI("/vehicles");
+
+		JSONObject body = new JSONObject();
+		body.put("model", "TT");
+		body.put("brandId", brand.getId());
+		body.put("year", 2010);
+		body.put("price", 35000.50);
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.post(uri)
+				.content(body.toString())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isCreated());
+	}
+
+	@Test
+	public void shouldReturn404WhenTryCreateVehicleWithNonexistentBrandId() throws Exception {
+
+		URI uri = new URI("/vehicles");
+
+		JSONObject body = new JSONObject();
+		body.put("model", "TT");
+		body.put("brandId", 999L);
+		body.put("year", 2012);
+		body.put("price", 35000);
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.post(uri)
+				.content(body.toString())
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+
+	@Test
+	public void shouldDeleteVehicleWithCorrectVehicleId() throws Exception {
+
+		Brand brand = brandRepository.save(new Brand("Audi"));
+		Vehicle vehicle = vehicleRepository.save(new Vehicle(brand, 2012, "TT", new BigDecimal(3500.95)));
+
+		URI uri = new URI("/vehicles/" + vehicle.getId());
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.delete(uri)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
+	@Test
+	public void shouldReturn404WhenTryDeleteVehicleWithNonexistentVehicleId() throws Exception {
+
+		Brand brand = brandRepository.save(new Brand("Audi"));
+		vehicleRepository.save(new Vehicle(brand, 2012, "TT", new BigDecimal(3500.95)));
+
+		URI uri = new URI("/vehicles/" + 999);
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.delete(uri)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+
+	@Test
+	public void shouldReturn200WhenFindAllVehicles() throws Exception {
+		URI uri = new URI("/vehicles");
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.get(uri)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
+	@Test
+	public void shouldReturn200WhenFindOneVehicle() throws Exception {
+		Brand brand = brandRepository.save(new Brand("Audi"));
+		Vehicle vehicle = vehicleRepository.save(new Vehicle(brand, 2012, "TT", new BigDecimal(3500.95)));
+		URI uri = new URI("/vehicles/" + vehicle.getId());
+
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.get(uri)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk());
+	}
+
+	@Test
+	public void shouldReturn404WhenTryFindOneWithNonexistentVehicleId() throws Exception {
+		Brand brand = brandRepository.save(new Brand("Audi"));
+		Vehicle vehicle = vehicleRepository.save(new Vehicle(brand, 2012, "TT", new BigDecimal(3500.95)));
+		URI uri = new URI("/vehicles/" + 999);
+
+		mockMvc.perform(MockMvcRequestBuilders
+				.get(uri)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isNotFound());
+	}
+	    
 }

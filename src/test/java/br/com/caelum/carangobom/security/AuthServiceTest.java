@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import static org.mockito.Mockito.when;
@@ -30,18 +31,18 @@ class AuthServiceTest {
     @Test
     void shouldReturnTheUser(){
 
-        var newUser = new User(1L, "username", "password");
+        User newUser = new User(1L, "username", "password");
 
         when(userRepository.findByUsername(newUser.getUsername())).thenReturn(java.util.Optional.of(newUser));
 
-        var authAction = authService.loadUserByUsername(newUser.getUsername());
+        UserDetails authAction = authService.loadUserByUsername(newUser.getUsername());
 
         Assert.assertEquals(authAction.getUsername(), newUser.getUsername());
     }
 
     @Test
     void shouldReturnUsernameNotFoundException(){
-        var userName = "any_string";
+        String userName = "any_string";
 
         when(userRepository.findByUsername(userName)).thenReturn(java.util.Optional.empty());
 
