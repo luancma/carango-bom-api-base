@@ -18,9 +18,9 @@ class ProfileTest {
         profile.get().setId(1L);
         profile.get().setName("Test name");
 
-        var profileId = profile.get().getId();
-        var profileName = profile.get().getName();
-        var profileAuth = profile.get().getAuthority();
+        Long profileId = profile.get().getId();
+        String profileName = profile.get().getName();
+        String profileAuth = profile.get().getAuthority();
 
         Assertions.assertEquals(1L, profileId.intValue());
         Assertions.assertEquals("Test name", profileName.toString());

@@ -2,11 +2,13 @@ package br.com.caelum.carangobom.auth;
 
 import br.com.caelum.carangobom.auth.token.TokenDTO;
 import br.com.caelum.carangobom.auth.token.TokenService;
+import br.com.caelum.carangobom.user.UserDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,8 +37,8 @@ class AuthControllerTest {
 
     @Test
     void whenAuthenticate_shouldReturnToken() {
-        var userName = "username";
-        var password =  "password";
+        String userName = "username";
+        String password =  "password";
         TokenDTO authRequest = new TokenDTO("123123", "123456");
 
         LoginForm loginForm = new LoginForm();
@@ -47,7 +49,7 @@ class AuthControllerTest {
         when(tokenServiceMock.generateToken(Mockito.any()))
                 .thenReturn("TOKEN");
 
-        var response = authController.authentication(loginForm);
+        ResponseEntity<TokenDTO> response = authController.authentication(loginForm);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(loginForm.getUsername(), userName);
@@ -69,7 +71,7 @@ class AuthControllerTest {
                 .when(authenticationManagerMock)
                 .authenticate(any());
 
-       var response= authController.authentication(loginForm);
+        ResponseEntity<TokenDTO> response= authController.authentication(loginForm);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 

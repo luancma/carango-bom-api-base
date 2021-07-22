@@ -37,7 +37,7 @@ class UserServiceTest {
 
     @Test
     void shouldNotValidateUsernameAlreadyInUse(){
-        var user = new User(1L, "username", "password");
+        User user = new User(1L, "username", "password");
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
         Assert.assertThrows(
                 BadRequestException.class, ()->
@@ -47,7 +47,7 @@ class UserServiceTest {
 
     @Test
     void shouldPassUsernameAlreadyInUse(){
-        var user = new User(1L, "username", "password");
+        User user = new User(1L, "username", "password");
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
         Assertions.assertNull(userService.usernameAlreadyInUse(user));
     }
@@ -55,7 +55,7 @@ class UserServiceTest {
     @Test
     void shouldRemoveUser(){
         when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(newUser));
-        var userServiceAction = userService.removeUserById(newUser.getId());
+        boolean userServiceAction = userService.removeUserById(newUser.getId());
         Assertions.assertTrue(userServiceAction);
     }
 
@@ -71,7 +71,7 @@ class UserServiceTest {
     @Test
     void shouldCreateOneUser(){
         when(userRepository.save(newUser)).thenReturn(newUser);
-        var userServiceAction = userService.createNewUser(newUser);
+        User userServiceAction = userService.createNewUser(newUser);
         Assertions.assertEquals(userServiceAction.getUsername(), newUser.getUsername());
         Assertions.assertEquals(userServiceAction.getId(), newUser.getId());
     }
@@ -89,7 +89,7 @@ class UserServiceTest {
     @Test
     void shouldFindOneUser(){
         when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(newUser));
-        var userServiceAction = userService.findById(newUser.getId());
+        User userServiceAction = userService.findById(newUser.getId());
         Assertions.assertEquals(userServiceAction.getId(), newUser.getId());
     }
 
