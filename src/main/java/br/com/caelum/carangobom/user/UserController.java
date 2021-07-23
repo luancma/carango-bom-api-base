@@ -18,6 +18,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
@@ -32,7 +33,7 @@ public class UserController {
         this.userService = new UserService(this.userRepository);
     }
 
-    @GetMapping("/users")
+    @GetMapping("/paged")
     @Cacheable("user-list")
     public Page<UserDTO> listAll(
             @PageableDefault(sort = "username", direction = Sort.Direction.ASC, page = 0, size = 10)
@@ -44,14 +45,14 @@ public class UserController {
         return userRepository.findAll(pageable).map(UserDTO::toUser);
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDTO> details(@PathVariable Long id){
         User getUser = userService.findById(id);
         UserDTO formatedUser = UserDTO.toUser(getUser);
         return ResponseEntity.ok(formatedUser);
     }
 
-    @PostMapping("/users")
+    @PostMapping
     @Transactional
     @CacheEvict(value = "user-list", allEntries = true)
     public ResponseEntity<UserDTO> create(@RequestBody @Valid UserForm userForm, UriComponentsBuilder uriBuilder) {
@@ -62,11 +63,12 @@ public class UserController {
         return ResponseEntity.created(uri).body(convertedUserDTO);
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     @Transactional
     @CacheEvict(value = "user-list", allEntries = true)
     public ResponseEntity<UserDTO>delete(@PathVariable Long id) {
-        userService.removeUserById(id);
-        return ResponseEntity.ok().build();
+        User user = userService.removeUserById(id);
+        UserDTO userDto = new UserDTO(user);
+        return ResponseEntity.ok().body(userDto);
     }
 }

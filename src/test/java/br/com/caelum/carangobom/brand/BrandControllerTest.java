@@ -51,7 +51,7 @@ class BrandControllerTest {
         when(brandRepository.findAll(pageable))
                 .thenReturn(pagedBrands);
 
-        Page<Brand> resultado = brandController.findAll(pageable);
+        Page<Brand> resultado = brandController.findAllPaged(pageable);
         assertEquals(pagedBrands, resultado);
     }
 

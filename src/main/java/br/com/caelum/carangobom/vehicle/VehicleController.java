@@ -38,8 +38,8 @@ public class VehicleController {
 		this.vehicleService = vehicleService;
 	}
 
-	@GetMapping
-	public Page<Vehicle> findAll(
+	@GetMapping("/paged")
+	public Page<Vehicle> findAllPaged(
 			@PageableDefault(sort = "model", direction = Direction.ASC, page = 0, size = 10)
 			Pageable pageable
 		) {
