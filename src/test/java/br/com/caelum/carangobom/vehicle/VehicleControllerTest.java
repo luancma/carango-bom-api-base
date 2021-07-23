@@ -26,7 +26,7 @@ import br.com.caelum.carangobom.brand.BrandRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
 class VehicleControllerTest {
 
 	@Autowired

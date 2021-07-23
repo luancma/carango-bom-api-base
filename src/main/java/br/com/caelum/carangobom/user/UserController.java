@@ -3,10 +3,15 @@ package br.com.caelum.carangobom.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.persistence.Converter;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
@@ -29,10 +34,14 @@ public class UserController {
 
     @GetMapping("/users")
     @Cacheable("user-list")
-    public List<UserDTO> listAll() {
-        // TODO create the user pagination
+    public Page<UserDTO> listAll(
+            @PageableDefault(sort = "username", direction = Sort.Direction.ASC, page = 0, size = 10)
+                    Pageable pageable
+    ) {
         List<User> users = userRepository.findAll();
-        return UserDTO.toUserList(users);
+         UserDTO.toUserList(users);
+
+        return userRepository.findAll(pageable).map(UserDTO::toUser);
     }
 
     @GetMapping("/users/{id}")

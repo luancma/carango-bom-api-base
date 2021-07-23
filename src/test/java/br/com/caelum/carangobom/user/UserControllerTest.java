@@ -1,11 +1,15 @@
 package br.com.caelum.carangobom.user;
 
+import br.com.caelum.carangobom.brand.Brand;
 import br.com.caelum.carangobom.exception.BadRequestException;
 import br.com.caelum.carangobom.exception.NotFoundException;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -77,11 +81,23 @@ class UserControllerTest {
                 new User(2L, "username2", "password2")
         );
 
-        when(userRepository.findAll()).thenReturn(userList);
+        List<UserDTO> responseList = Arrays.asList(
+                new UserDTO(1L, "username1"),
+                new UserDTO(2L, "username2")
+        );
 
-        List<UserDTO> userListController = userController.listAll();
+        Page<User> pagedUsers = new PageImpl<User>(userList);
 
-        assertEquals(userList.size(),userListController.size());
+        Page<UserDTO> convertedPagedUsers = new PageImpl<UserDTO>(responseList);
+
+        PageRequest pageable = PageRequest.of(1, 10);
+
+        when(userRepository.findAll(pageable)).thenReturn(pagedUsers);
+
+        Page<UserDTO> userListController = userController.listAll(pageable);
+
+        Assert.assertEquals(convertedPagedUsers, userListController);
+
     }
 
     @Test
