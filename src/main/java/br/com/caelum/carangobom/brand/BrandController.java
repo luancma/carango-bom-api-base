@@ -12,6 +12,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -26,12 +29,18 @@ public class BrandController {
         this.brandRepository = brandRepository;
     }
     
-    @GetMapping
-    public Page<Brand> findAll(
+    @GetMapping("/paged")
+    public Page<Brand> findAllPaged(
 			@PageableDefault(sort = "name", direction = Direction.ASC, page = 0, size = 10)
 			Pageable pageable
 		) {
 	    return brandRepository.findAll(pageable);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Brand>> findAll() {
+        List<Brand> brands = brandRepository.findAll();
+        return ResponseEntity.ok(brands);
     }
 
     @GetMapping("/{id}")

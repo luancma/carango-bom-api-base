@@ -26,7 +26,7 @@ import br.com.caelum.carangobom.brand.BrandRepository;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 class IntegrateVehicleTest {
 
 	@Autowired
@@ -155,7 +155,7 @@ class IntegrateVehicleTest {
 
 	@Test
 	public void shouldReturn200WhenFindAllVehicles() throws Exception {
-		URI uri = new URI("/vehicles");
+		URI uri = new URI("/vehicles/paged");
 
 		mockMvc.perform(MockMvcRequestBuilders
 				.get(uri)

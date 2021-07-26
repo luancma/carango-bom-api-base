@@ -55,8 +55,8 @@ class UserServiceTest {
     @Test
     void shouldRemoveUser(){
         when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(newUser));
-        boolean userServiceAction = userService.removeUserById(newUser.getId());
-        Assertions.assertTrue(userServiceAction);
+        User userServiceAction = userService.removeUserById(newUser.getId());
+        Assertions.assertEquals(userServiceAction.getId(), newUser.getId());
     }
 
     @Test

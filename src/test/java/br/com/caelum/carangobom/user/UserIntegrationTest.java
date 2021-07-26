@@ -21,7 +21,7 @@ import java.net.URI;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class UserIntegrationTest {
 
     @Autowired
@@ -35,7 +35,7 @@ public class UserIntegrationTest {
 
     @Test
     public void shouldReturn200WhenGetTheListOfUser() throws Exception {
-        URI uri = new URI("/users");
+        URI uri = new URI("/users/paged");
         mockMvc.perform(MockMvcRequestBuilders
                 .get(uri)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -89,7 +89,7 @@ public class UserIntegrationTest {
     @Test
     public void shouldReturnTheListOfUsers() throws Exception {
 
-        URI uri = new URI("/users");
+        URI uri = new URI("/users/paged");
         mockMvc.perform(MockMvcRequestBuilders
                 .get(uri)
                 .contentType(MediaType.APPLICATION_JSON))
