@@ -21,7 +21,7 @@ import java.net.URI;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class DashboardIntegrationTest {
 
     @Autowired
